@@ -74,24 +74,6 @@ export function Footer({
         )}
       </div>
       <div className="flex justify-end items-center gap-2.5">
-        <a
-          href="https://huggingface.co/spaces/victor/deepsite-gallery"
-          target="_blank"
-        >
-          <Button size="sm" variant="ghost">
-            <SparkleIcon className="size-3.5" />
-            <span className="max-lg:hidden">DeepSite Gallery</span>
-          </Button>
-        </a>
-        <a
-          target="_blank"
-          href="https://huggingface.co/spaces/enzostvs/deepsite/discussions/157"
-        >
-          <Button size="sm" variant="outline">
-            <HelpCircle className="size-3.5" />
-            <span className="max-lg:hidden">Help</span>
-          </Button>
-        </a>
         <Button size="sm" variant="outline" onClick={handleRefreshIframe}>
           <RefreshCcw className="size-3.5" />
           <span className="max-lg:hidden">Refresh Preview</span>

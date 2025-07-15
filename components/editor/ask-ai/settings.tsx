@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { PROVIDERS, MODELS } from "@/lib/providers";
+import { PROVIDERS, MODELS, getAllModels, CustomModel } from "@/lib/providers";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,22 +18,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useUpdateEffect } from "react-use";
 import Image from "next/image";
+import { CustomModelForm } from "./custom-model-form";
 
 export function Settings({
   open,
   onClose,
-  provider,
   model,
   error,
   isFollowUp = false,
-  onChange,
   onModelChange,
 }: {
   open: boolean;
-  provider: string;
   model: string;
   error?: string;
   isFollowUp?: boolean;
@@ -41,21 +39,22 @@ export function Settings({
   onChange: (provider: string) => void;
   onModelChange: (model: string) => void;
 }) {
-  const modelAvailableProviders = useMemo(() => {
-    const availableProviders = MODELS.find(
-      (m: { value: string }) => m.value === model
-    )?.providers;
-    if (!availableProviders) return Object.keys(PROVIDERS);
-    return Object.keys(PROVIDERS).filter((id) =>
-      availableProviders.includes(id)
-    );
-  }, [model]);
+  const [allModels, setAllModels] = useState(() => getAllModels());
 
-  useUpdateEffect(() => {
-    if (provider !== "auto" && !modelAvailableProviders.includes(provider)) {
-      onChange("auto");
+  useEffect(() => {
+    // Refresh models when the settings open to get latest custom models
+    if (open) {
+      setAllModels(getAllModels());
     }
-  }, [model, provider]);
+  }, [open]);
+
+  const handleCustomModelAdded = (newModel: CustomModel) => {
+    setAllModels(getAllModels());
+    onModelChange(newModel.value);
+  };
+
+  const builtInModels = MODELS;
+  const customModels = allModels.filter(m => 'isCustom' in m && m.isCustom);
 
   return (
     <div className="">
@@ -81,16 +80,16 @@ export function Settings({
             )}
             <label className="block">
               <p className="text-neutral-300 text-sm mb-2.5">
-                Choose a DeepSeek model
+                Choose a model
               </p>
               <Select defaultValue={model} onValueChange={onModelChange}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a DeepSeek model" />
+                  <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>DeepSeek models</SelectLabel>
-                    {MODELS.map(
+                    <SelectLabel>Built-in models</SelectLabel>
+                    {builtInModels.map(
                       ({
                         value,
                         label,
@@ -118,6 +117,23 @@ export function Settings({
                       )
                     )}
                   </SelectGroup>
+                  {customModels.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel>Custom models</SelectLabel>
+                      {customModels.map((customModel) => (
+                        <SelectItem
+                          key={customModel.value}
+                          value={customModel.value}
+                          className=""
+                        >
+                          {customModel.label}
+                          <span className="text-xs bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-full px-1.5 py-0.5 ml-1">
+                            Custom
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
                 </SelectContent>
               </Select>
             </label>
@@ -127,74 +143,11 @@ export function Settings({
                 We automatically switch to the default model for you.
               </div>
             )}
+            <CustomModelForm onModelAdded={handleCustomModelAdded} />
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-neutral-300 text-sm mb-1.5">
-                    Use auto-provider
-                  </p>
-                  <p className="text-xs text-neutral-400/70">
-                    We&apos;ll automatically select the best provider for you
-                    based on your prompt.
-                  </p>
+                  
                 </div>
-                <div
-                  className={classNames(
-                    "bg-neutral-700 rounded-full min-w-10 w-10 h-6 flex items-center justify-between p-1 cursor-pointer transition-all duration-200",
-                    {
-                      "!bg-sky-500": provider === "auto",
-                    }
-                  )}
-                  onClick={() => {
-                    const foundModel = MODELS.find(
-                      (m: { value: string }) => m.value === model
-                    );
-                    if (provider === "auto" && foundModel?.autoProvider) {
-                      onChange(foundModel.autoProvider);
-                    } else {
-                      onChange("auto");
-                    }
-                  }}
-                >
-                  <div
-                    className={classNames(
-                      "w-4 h-4 rounded-full shadow-md transition-all duration-200 bg-neutral-200",
-                      {
-                        "translate-x-4": provider === "auto",
-                      }
-                    )}
-                  />
-                </div>
-              </div>
-              <label className="block">
-                <p className="text-neutral-300 text-sm mb-2">
-                  Inference Provider
-                </p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {modelAvailableProviders.map((id: string) => (
-                    <Button
-                      key={id}
-                      variant={id === provider ? "default" : "secondary"}
-                      size="sm"
-                      onClick={() => {
-                        onChange(id);
-                      }}
-                    >
-                      <Image
-                        src={`/providers/${id}.svg`}
-                        alt={PROVIDERS[id as keyof typeof PROVIDERS].name}
-                        className="size-5 mr-2"
-                        width={20}
-                        height={20}
-                      />
-                      {PROVIDERS[id as keyof typeof PROVIDERS].name}
-                      {id === provider && (
-                        <RiCheckboxCircleFill className="ml-2 size-4 text-blue-500" />
-                      )}
-                    </Button>
-                  ))}
-                </div>
-              </label>
             </div>
           </main>
         </PopoverContent>

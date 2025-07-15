@@ -31,26 +31,67 @@ export const PROVIDERS = {
   },
 };
 
+// Custom model interface
+export interface CustomModel {
+  id: string;
+  value: string;
+  label: string;
+  baseUrl: string;
+  token: string;
+  maxTokens: number;
+  isCustom: true;
+  isNew?: boolean;
+  isThinker?: boolean;
+}
+
+// Utility functions for managing custom models
+export const getCustomModels = (): CustomModel[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem('custom-models');
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveCustomModel = (model: Omit<CustomModel, 'id' | 'isCustom'>): CustomModel => {
+  const customModel: CustomModel = {
+    ...model,
+    id: `custom-${Date.now()}`,
+    isCustom: true,
+  };
+  
+  const customModels = getCustomModels();
+  customModels.push(customModel);
+  localStorage.setItem('custom-models', JSON.stringify(customModels));
+  
+  return customModel;
+};
+
+export const deleteCustomModel = (id: string): void => {
+  const customModels = getCustomModels().filter(model => model.id !== id);
+  localStorage.setItem('custom-models', JSON.stringify(customModels));
+};
+
+export const getAllModels = () => {
+  return [...MODELS, ...getCustomModels()];
+};
+
 export const MODELS = [
   {
-    value: "deepseek-ai/DeepSeek-V3-0324",
-    label: "DeepSeek V3 O324",
-    providers: ["fireworks-ai", "nebius", "sambanova", "novita", "hyperbolic"],
-    autoProvider: "novita",
+    value: "deepseek-chat",
+    label: "deepseek-chat",
+    baseUrl: "https://api.deepseek.com/v1",
+    token: process.env.DEEPSEEK_TOKEN || "",
+    maxTokens: 131_072,
   },
   {
-    value: "deepseek-ai/DeepSeek-R1-0528",
-    label: "DeepSeek R1 0528",
-    providers: [
-      "fireworks-ai",
-      "novita",
-      "hyperbolic",
-      "nebius",
-      "together",
-      "sambanova",
-    ],
-    autoProvider: "novita",
-    isNew: true,
+    value: "deepseek-reasoner",
+    label: "DeepSeek-reasoner",
+    baseUrl: "https://api.deepseek.com/v1",
+    token: process.env.DEEPSEEK_TOKEN || "",
     isThinker: true,
+    maxTokens: 131_072,
   },
 ];

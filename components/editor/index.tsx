@@ -178,16 +178,6 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
   return (
     <section className="h-[100dvh] bg-neutral-950 flex flex-col">
       <Header tab={currentTab} onNewTab={setCurrentTab}>
-        <LoadProject
-          onSuccess={(project: Project) => {
-            router.push(`/projects/${project.space_id}`);
-          }}
-        />
-        {project?._id ? (
-          <SaveButton html={html} prompts={prompts} />
-        ) : (
-          <DeployButton html={html} prompts={prompts} />
-        )}
       </Header>
       <main className="bg-neutral-950 flex-1 max-lg:flex-col flex w-full max-lg:h-[calc(100%-82px)] relative">
         {currentTab === "chat" && (

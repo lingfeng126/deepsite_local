@@ -9,7 +9,7 @@ import { FaStopCircle } from "react-icons/fa";
 
 import ProModal from "@/components/pro-modal";
 import { Button } from "@/components/ui/button";
-import { MODELS } from "@/lib/providers";
+import { MODELS, getAllModels, getCustomModels } from "@/lib/providers";
 import { HtmlHistory } from "@/types";
 import { InviteFriends } from "@/components/invite-friends";
 import { Settings } from "@/components/editor/ask-ai/settings";
@@ -88,6 +88,11 @@ export function AskAI({
         const selectedElementHtml = selectedElement
           ? selectedElement.outerHTML
           : "";
+        
+        // Get custom model if it's a custom one
+        const customModels = getCustomModels();
+        const customModel = customModels.find(m => m.value === model);
+        
         const request = await fetch("/api/ask-ai", {
           method: "PUT",
           body: JSON.stringify({
@@ -97,6 +102,7 @@ export function AskAI({
             model,
             html,
             selectedElementHtml,
+            customModel,
           }),
           headers: {
             "Content-Type": "application/json",
@@ -129,14 +135,21 @@ export function AskAI({
           if (audio.current) audio.current.play();
         }
       } else {
+        // Get custom model if it's a custom one
+        const customModels = getCustomModels();
+        const customModel = customModels.find(m => m.value === model);
+        
         const request = await fetch("/api/ask-ai", {
           method: "POST",
           body: JSON.stringify({
             prompt,
-            provider,
             model,
             html: isSameHtml ? "" : html,
             redesignMarkdown,
+            useCustomModel: !!customModel,
+            baseUrl: customModel?.baseUrl || "",
+            maxTokens: customModel?.maxTokens || 4096,
+            token: customModel?.token || "",
           }),
           headers: {
             "Content-Type": "application/json",
@@ -147,7 +160,8 @@ export function AskAI({
         if (request && request.body) {
           const reader = request.body.getReader();
           const decoder = new TextDecoder("utf-8");
-          const selectedModel = MODELS.find(
+          const allModels = getAllModels();
+          const selectedModel = allModels.find(
             (m: { value: string }) => m.value === model
           );
           let contentThink: string | undefined = undefined;
@@ -178,7 +192,7 @@ export function AskAI({
               setPrompt("");
               setisAiWorking(false);
               setHasAsked(true);
-              setModel(MODELS[0].value);
+              setModel(getAllModels()[0].value);
               if (audio.current) audio.current.play();
 
               // Now we have the complete HTML including </html>, so set it to be sure
@@ -195,7 +209,7 @@ export function AskAI({
 
             const chunk = decoder.decode(value, { stream: true });
             thinkResponse += chunk;
-            if (selectedModel?.isThinker) {
+            if ((selectedModel as any)?.isThinker) {
               const thinkMatch = thinkResponse.match(/<think>[\s\S]*/)?.[0];
               if (thinkMatch && !thinkResponse?.includes("</think>")) {
                 if ((contentThink?.length ?? 0) < 3) {
@@ -378,39 +392,9 @@ export function AskAI({
         </div>
         <div className="flex items-center justify-between gap-2 px-4 pb-3">
           <div className="flex-1 flex items-center justify-start gap-1.5">
-            <ReImagine onRedesign={(md) => callAi(md)} />
-            {!isSameHtml && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="xs"
-                    variant={isEditableModeEnabled ? "default" : "outline"}
-                    onClick={() => {
-                      setIsEditableModeEnabled?.(!isEditableModeEnabled);
-                    }}
-                    className={classNames("h-[28px]", {
-                      "!text-neutral-400 hover:!text-neutral-200 !border-neutral-600 !hover:!border-neutral-500":
-                        !isEditableModeEnabled,
-                    })}
-                  >
-                    <Crosshair className="size-4" />
-                    Edit
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  align="start"
-                  className="bg-neutral-950 text-xs text-neutral-200 py-1 px-2 rounded-md -translate-y-0.5"
-                >
-                  Select an element on the page to ask DeepSite edit it
-                  directly.
-                </TooltipContent>
-              </Tooltip>
-            )}
-            <InviteFriends />
           </div>
           <div className="flex items-center justify-end gap-2">
             <Settings
-              provider={provider as string}
               model={model as string}
               onChange={setProvider}
               onModelChange={setModel}

@@ -25,5 +25,6 @@ const nextConfig: NextConfig = {
     return config;
   },
 };
+require('global-agent/bootstrap');
 
 export default nextConfig;
