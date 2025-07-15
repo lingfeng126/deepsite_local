@@ -82,14 +82,14 @@ export const MODELS = [
   {
     value: "deepseek-chat",
     label: "deepseek-chat",
-    baseUrl: "https://api.deepseek.com/v1",
+    baseUrl: process.env.DEEPSEEK_URL || "https://api.deepseek.com/v1",
     token: process.env.DEEPSEEK_TOKEN || "",
     maxTokens: 131_072,
   },
   {
     value: "deepseek-reasoner",
     label: "DeepSeek-reasoner",
-    baseUrl: "https://api.deepseek.com/v1",
+    baseUrl: process.env.DEEPSEEK_URL || "https://api.deepseek.com/v1",
     token: process.env.DEEPSEEK_TOKEN || "",
     isThinker: true,
     maxTokens: 131_072,
