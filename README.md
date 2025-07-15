@@ -17,6 +17,11 @@ models:
 
 DeepSite is a coding platform powered by DeepSeek AI, designed to make coding smarter and more efficient. Tailored for developers, data scientists, and AI engineers, it integrates generative AI into your coding projects to enhance creativity and productivity.
 
-## How to use it locally
+## How to use it locally (official)
 
 Follow [this discussion](https://huggingface.co/spaces/enzostvs/deepsite/discussions/74)
+This method requires huggingface token & support only deepseek model
+
+## What's new?
+Support model configuration. Remove some features like gallery.
+
