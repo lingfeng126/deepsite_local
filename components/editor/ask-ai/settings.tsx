@@ -1,13 +1,11 @@
-import classNames from "classnames";
 import { PiGearSixFill } from "react-icons/pi";
-import { RiCheckboxCircleFill } from "react-icons/ri";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { PROVIDERS, MODELS, getAllModels, CustomModel } from "@/lib/providers";
+import { MODELS, getAllModels, CustomModel } from "@/lib/providers";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,9 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMemo, useState, useEffect } from "react";
-import { useUpdateEffect } from "react-use";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import { CustomModelForm } from "./custom-model-form";
 
 export function Settings({

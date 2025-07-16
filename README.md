@@ -25,3 +25,7 @@ This method requires huggingface token & support only deepseek model
 ## What's new?
 Support model configuration. Remove some features like gallery.
 
+## TODO
+
+[] Support storage on the server  
+

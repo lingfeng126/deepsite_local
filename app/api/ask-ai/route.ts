@@ -1,22 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { OpenAI } from "openai";
 
-import { MODELS, PROVIDERS } from "@/lib/providers";
+import { MODELS } from "@/lib/providers";
 import {
   DIVIDER,
   FOLLOW_UP_SYSTEM_PROMPT,
   INITIAL_SYSTEM_PROMPT,
-  MAX_REQUESTS_PER_IP,
   REPLACE_END,
   SEARCH_START,
 } from "@/lib/prompts";
 import '@/lib/proxy';
-import MY_TOKEN_KEY from "@/lib/get-cookie-name";
 
-const ipAddresses = new Map();
 
 function getOpenAIClient(apiKey: string, baseUrl?: string) {
   return new OpenAI({apiKey, baseURL: baseUrl || "https://api.openai.com/v1"});
@@ -170,11 +166,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const authHeaders = await headers();
-  const userToken = request.cookies.get(MY_TOKEN_KEY())?.value;
-
   const body = await request.json();
-  const { prompt, html, previousPrompt, provider, selectedElementHtml } = body;
+  const { prompt, html, previousPrompt, _, selectedElementHtml } = body;
 
   if (!prompt || !html) {
     return NextResponse.json(
@@ -185,12 +178,7 @@ export async function PUT(request: NextRequest) {
 
   const selectedModel = MODELS[0];
 
-  let token = selectedModel.token;
-
-  const ip = authHeaders.get("x-forwarded-for")?.includes(",")
-    ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
-    : authHeaders.get("x-forwarded-for");
-
+  const token = selectedModel.token;
 
   const openai = getOpenAIClient(token, selectedModel.baseUrl);
 

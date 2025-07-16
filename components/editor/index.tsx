@@ -21,10 +21,7 @@ import { defaultHTML } from "@/lib/consts";
 import { Preview } from "@/components/editor/preview";
 import { useEditor } from "@/hooks/useEditor";
 import { AskAI } from "@/components/editor/ask-ai";
-import { DeployButton } from "./deploy-button";
 import { Project } from "@/types";
-import { SaveButton } from "./save-button";
-import { LoadProject } from "../my-projects/load-project";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
 
 export const AppEditor = ({ project }: { project?: Project | null }) => {
